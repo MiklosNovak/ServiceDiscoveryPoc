@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
+using Sidecar.Dtos;
 
 namespace Sidecar.Controllers;
 

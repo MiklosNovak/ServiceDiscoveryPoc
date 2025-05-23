@@ -5,6 +5,7 @@ namespace Sidecar;
 public class ServiceRegistry
 {
     private readonly IConsulClient _consulClient;
+    private readonly Dictionary<string, AgentService> _serviceCache = new(StringComparer.InvariantCultureIgnoreCase);
 
     public ServiceRegistry(IConsulClient consulClient)
     {
@@ -37,13 +38,26 @@ public class ServiceRegistry
 
         if (queryResult.StatusCode != System.Net.HttpStatusCode.OK)
         {
+            // Simple caching mechanism which can help somewhat if the Consul server is down or unreachable
+            if (_serviceCache.TryGetValue(serviceName, out var cachedService))
+            {
+                return cachedService;
+            }
+
             throw new Exception($"Failed to query Consul for service {serviceName}. Status code: {queryResult.StatusCode}");
         }
 
-        var service = queryResult.Response?
+        var serviceQuery = queryResult.Response?
             .Where(s => string.Equals(s.Value.Service, serviceName, StringComparison.InvariantCultureIgnoreCase))
             .Select(s => s.Value);
 
-        return service?.FirstOrDefault();
+        var service = serviceQuery?.FirstOrDefault();
+
+        if (service != null)
+        {
+            _serviceCache[serviceName] = service;
+        }
+
+        return service;
     }
 }

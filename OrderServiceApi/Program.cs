@@ -1,5 +1,6 @@
-using Consul;
-using Sidecar;
+using OrderServiceApi;
+using OrderServiceApi.ServiceRegistry;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,19 +11,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<ProductRepository>();
+builder.Services.AddSingleton<ServiceRegistryClient>();
+
 builder.Configuration
     .AddJsonFile("appsettings.json")
     .AddEnvironmentVariables();
-
-builder.Services.AddSingleton<IConsulClient, ConsulClient>(s => new (cfg =>
-{
-    var config = s.GetRequiredService<IConfiguration>();
-    var consulUrl = config.GetValue<string>("ConsulUrl");
-    cfg.Address = new Uri(consulUrl);
-}));
-
-builder.Services.AddSingleton<ServiceRegistry>();
-
 
 var app = builder.Build();
 
@@ -33,6 +27,20 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.Lifetime.ApplicationStarted.Register(async () =>
+{
+    var registryClient = app.Services.GetRequiredService<ServiceRegistryClient>();
+
+    var address = Dns.GetHostName();
+    var port = 8080; // Kestrel listens on port 8080 by default
+
+    await registryClient.RegisterServiceAsync(new()
+    {
+        Name = "OrderServiceApi",
+        Address = address,
+        Port = port
+    });
+});
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

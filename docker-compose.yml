@@ -1,15 +1,30 @@
 services:
 
   consul:
-    image: hashicorp/consul
+    image: hashicorp/consul        
     ports:
       - "8500:8500"
     command: "agent -dev -client=0.0.0.0"
     networks:
-      - shared-network
+      - shared-network  
 
-  sidecar:
-    image: sidecar
+  order-service-api:
+    hostname: orderserviceapi
+    image: order-service-api    
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    build:
+      context: .
+      dockerfile: OrderServiceApi/Dockerfile
+    ports:
+      - "6002:8080"
+    networks:
+     - shared-network
+
+  order-service-api-sidecar:
+    image: sidecar    
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
     build:
       context: .
       dockerfile: Sidecar/Dockerfile

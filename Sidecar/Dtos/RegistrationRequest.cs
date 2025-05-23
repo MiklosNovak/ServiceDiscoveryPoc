@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Sidecar.Controllers;
+namespace Sidecar.Dtos;
 
 public record RegistrationRequest
 {

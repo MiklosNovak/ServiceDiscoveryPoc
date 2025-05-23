@@ -1,13 +1,9 @@
-using System.ComponentModel.DataAnnotations;
-
-namespace Sidecar.Controllers;
+namespace OrderServiceApi.ServiceRegistry.Dtos;
 
 public record RegistrationResponse
 {
-    [Required]
     public string Name { get; init; }
 
-    [Required]
     public string Address { get; init; }
 
     public int Port { get; init; }
