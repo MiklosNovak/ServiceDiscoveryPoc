@@ -20,7 +20,7 @@ public class ServiceRegistryClient
         var restRequest = new RestRequest("services", Method.Post)
             .AddJsonBody(request);
 
-        var response = await _client.ExecuteAsync(restRequest);
+        var response = await _client.ExecuteAsync(restRequest).ConfigureAwait(false);
 
         if (!response.IsSuccessful)
         {
@@ -33,7 +33,7 @@ public class ServiceRegistryClient
         var restRequest = new RestRequest("services")
             .AddQueryParameter("serviceName", serviceName);
 
-        var response = await _client.ExecuteAsync<RegistrationResponse>(restRequest);
+        var response = await _client.ExecuteAsync<RegistrationResponse>(restRequest).ConfigureAwait(false);
 
         if (!response.IsSuccessful)
         {

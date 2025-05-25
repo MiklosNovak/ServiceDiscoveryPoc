@@ -1,4 +1,5 @@
-using OrderServiceApi;
+using OrderServiceApi.Inventory;
+using OrderServiceApi.Products;
 using OrderServiceApi.ServiceRegistry;
 using System.Net;
 
@@ -13,6 +14,14 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<ProductRepository>();
 builder.Services.AddSingleton<ServiceRegistryClient>();
+
+builder.Services.AddScoped<InventoryClient>(s =>
+{
+   var serviceRegistryClient =  s.GetRequiredService<ServiceRegistryClient>();
+   var service =  serviceRegistryClient.GetServiceAsync("InventoryServiceApi");
+   var serviceUrl = $"http://{service.Result.Address}:{service.Result.Port}";
+   return new InventoryClient(new(serviceUrl));
+});
 
 builder.Configuration
     .AddJsonFile("appsettings.json")
@@ -39,7 +48,7 @@ app.Lifetime.ApplicationStarted.Register(async () =>
         Name = "OrderServiceApi",
         Address = address,
         Port = port
-    });
+    }).ConfigureAwait(false);
 });
 app.UseHttpsRedirection();
 

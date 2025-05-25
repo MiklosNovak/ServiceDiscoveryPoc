@@ -8,20 +8,7 @@ services:
     networks:
       - shared-network  
 
-  order-service-api:
-    hostname: orderserviceapi
-    image: order-service-api    
-    environment:
-      ASPNETCORE_ENVIRONMENT: Development
-    build:
-      context: .
-      dockerfile: OrderServiceApi/Dockerfile
-    ports:
-      - "6002:8080"
-    networks:
-     - shared-network
-
-  order-service-api-sidecar:
+  sidecar:
     image: sidecar    
     environment:
       ASPNETCORE_ENVIRONMENT: Development
@@ -30,6 +17,39 @@ services:
       dockerfile: Sidecar/Dockerfile
     networks:
      - shared-network
+  
+  order-service-api:
+    hostname: orderserviceapi
+    image: order-service-api    
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      SideCarUrl: http://sidecar:8080
+    build:
+      context: .
+      dockerfile: OrderServiceApi/Dockerfile
+    ports:
+      - "6002:8080"
+    networks:
+     - shared-network
+    depends_on:
+      - consul
+      - sidecar  
+
+  inventory-service-api:
+    hostname: inventoryserviceapi
+    image: inventory-service-api
+    environment:      
+      SideCarUrl: http://sidecar:8080      
+    build:
+      context: .
+      dockerfile: InventoryServiceApi/Dockerfile
+    ports:
+      - "6003:8000"
+    networks:
+     - shared-network  
+    depends_on:
+      - consul
+      - sidecar  
   
 networks:
   shared-network:

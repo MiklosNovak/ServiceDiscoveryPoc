@@ -1,4 +1,4 @@
-namespace OrderServiceApi;
+namespace OrderServiceApi.Products;
 
 public class ProductRepository
 {

@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OrderServiceApi.Dtos;
+using OrderServiceApi.Inventory;
+using OrderServiceApi.Products;
 using System.Net.Mime;
 
 namespace OrderServiceApi.Controllers;
@@ -11,10 +13,12 @@ namespace OrderServiceApi.Controllers;
 public class OrderController : ControllerBase
 {
     private readonly ProductRepository _productRepository;
+    private readonly InventoryClient _inventoryClient;
 
-    public OrderController(ProductRepository productRepository)
+    public OrderController(ProductRepository productRepository, InventoryClient inventoryClient)
     {
         _productRepository = productRepository;
+        _inventoryClient = inventoryClient;
     }
 
 
@@ -34,13 +38,12 @@ public class OrderController : ControllerBase
             return NotFound($"Product {orderCreateRequest.Sku} not found! Available products: {string.Join(",", allProducts)}");
         }
 
-        //todo::
-        // check quantity by using inventory service
-        // if quantity is not available, return 422 Unprocessable Entity
+        var amounts = await _inventoryClient.GetAllAsync().ConfigureAwait(false);
 
-        // todo:: add sidecar registration
-
-        //todo:: create inventory service
+        if (!amounts.TryGetValue(orderCreateRequest.Sku, out var availableQuantity) || availableQuantity < orderCreateRequest.Quantity)
+        {
+            return UnprocessableEntity($"Insufficient quantity for product {orderCreateRequest.Sku}. Available: {availableQuantity}, Requested: {orderCreateRequest.Quantity}");
+        }
 
         return Ok();
     }

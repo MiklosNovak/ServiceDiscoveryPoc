@@ -34,24 +34,7 @@ public class ServiceRegistry
 
     public async Task<AgentService> GetServiceAsync(string serviceName)
     {
-        var queryResult = await _consulClient.Agent.Services().ConfigureAwait(false);
-
-        if (queryResult.StatusCode != System.Net.HttpStatusCode.OK)
-        {
-            // Simple caching mechanism which can help somewhat if the Consul server is down or unreachable
-            if (_serviceCache.TryGetValue(serviceName, out var cachedService))
-            {
-                return cachedService;
-            }
-
-            throw new Exception($"Failed to query Consul for service {serviceName}. Status code: {queryResult.StatusCode}");
-        }
-
-        var serviceQuery = queryResult.Response?
-            .Where(s => string.Equals(s.Value.Service, serviceName, StringComparison.InvariantCultureIgnoreCase))
-            .Select(s => s.Value);
-
-        var service = serviceQuery?.FirstOrDefault();
+        var service = await TryGetServiceAsync(serviceName).ConfigureAwait(false);
 
         if (service != null)
         {
@@ -59,5 +42,34 @@ public class ServiceRegistry
         }
 
         return service;
+    }
+
+    private async Task<AgentService> TryGetServiceAsync(string serviceName)
+    {
+        try
+        {
+            var queryResult = await _consulClient.Agent.Services().ConfigureAwait(false);
+
+            if (queryResult.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                throw new Exception($"Failed to query Consul for service {serviceName}. Status code: {queryResult.StatusCode}");
+            }
+
+            var serviceQuery = queryResult.Response?
+                .Where(s => string.Equals(s.Value.Service, serviceName, StringComparison.InvariantCultureIgnoreCase))
+                .Select(s => s.Value);
+
+            return serviceQuery?.FirstOrDefault();
+        }
+        catch
+        {
+            // Simple caching mechanism which can help somewhat if the Consul server is down or unreachable
+            if (_serviceCache.TryGetValue(serviceName, out var cachedService))
+            {
+                return cachedService;
+            }
+        }
+
+        return null;
     }
 }
