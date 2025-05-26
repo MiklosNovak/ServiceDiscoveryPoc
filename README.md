@@ -38,6 +38,18 @@ The project consists of two main services:
 	docker-compose build
 	docker-compose up
 	```
+3. you can access to consul: http://localhost:8500/ui/dc1/services
+   order Service API: http://localhost:6002/swagger/index.html
+   inventory Service API: http://localhost:6003/docs#/
+4. You can see egistered services in Consul UI.
+   Use the POST http://localhost:6002/orders endpoint to create an order, which will internally call the Inventory Service (using consul/sidcar) to check stock levels, e.g.:
+   ```json
+   {
+	"sku": "IP14P",
+	"quantity": 100
+	}
+   ```
+
 
 ## Conclusion
 
