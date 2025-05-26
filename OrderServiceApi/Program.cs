@@ -15,7 +15,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ProductRepository>();
 builder.Services.AddSingleton<ServiceRegistryClient>();
 
-builder.Services.AddScoped<InventoryClient>(s =>
+builder.Services.AddScoped(s =>
 {
    var serviceRegistryClient =  s.GetRequiredService<ServiceRegistryClient>();
    var service =  serviceRegistryClient.GetServiceAsync("InventoryServiceApi");
