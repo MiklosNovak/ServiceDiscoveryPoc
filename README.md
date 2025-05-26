@@ -1,56 +1,72 @@
-# Service Discovery POC: Inventory and Order Services
+﻿# Service Discovery POC: Inventory & Order Services
 
-This project demonstrates a microservices architecture using **.NET 8** and Python, focusing on service registration, health checks.
+Proof of Concept for microservices using **.NET 8** and **Python**, focusing on **service registration** and **health checks**.
 
-## Overview
+## Services
 
-The project consists of two main services:
+### Order Service API (`OrderServiceApi`)
+- Built with ASP.NET Core (.NET 8)
+- Endpoints for creating orders
+- Health check endpoint
+- Registers itself via `ServiceRegistryClient`
 
-1. **Order Service API** (`OrderServiceApi`):
-   - Built with ASP.NET Core (.NET 8).
-   - Exposes endpoints for order management.
-   - Includes a health check endpoint for monitoring service status.
-   - Includes a `ServiceRegistryClient` for registering the service with a service registry or sidecar for service discovery.
-   - Configured via `Program.cs` and controllers such as `OrderController` and `HealthCheckController`.
+### Inventory Service API (`InventoryServiceApi`)
+- Built with Python (FastAPI)
+- Handles inventory operations
+- Health check endpoint
+- Registers itself via `ServiceRegistryClient`
 
-2. **Inventory Service API** (`InventoryServiceApi`):
-   - Built with Python.
-   - Handles inventory-related operations.
-   - Includes a health check endpoint for monitoring service status.
-   - Includes a `ServiceRegistryClient` for registering the service with a service registry or sidecar for service discovery.
+## Domain Logic
 
-## Business Domain
+- `OrderService`:  
+  Creates orders and checks stock levels via InventoryService
 
-- **Order Service**: creating orders - calls the Inventory Service to verify stock levels before processing orders.
-- **Inventory Service**: verifying stock levels
+- `InventoryService`:  
+  Verifies and manages stock availability
 
-## Key Components
+## Features
 
-- **Service Registration**: The `ServiceRegistryClient` in the Inventory Service registers the service with a registry for discoverability by other services.
-- **Health Checks**: The Order Service exposes a health check endpoint to support monitoring and orchestration.
-- **API Controllers**: Both services use controllers or handlers to process HTTP requests and encapsulate business logic.
+- **Service Registration**: Consul-based using `ServiceRegistryClient`
+- **Health Checks**: endpoints for service monitoring
+- **HTTP APIs**: RESTful endpoints in both services
 
+## How to Run
 
-1. Ensure you have **.NET 8 SDK** and **Python 3.8** installed.
-2. For some reason Visual Studio gives a build error because of the Python project, so need to build/run using docker-compose.
-	Navigate to the solution directory and Run the following command to build and start the services:
-	```bash
-	docker-compose build
-	docker-compose up
-	```
-3. you can access to consul: http://localhost:8500/ui/dc1/services
-   order Service API: http://localhost:6002/swagger/index.html
-   inventory Service API: http://localhost:6003/docs#/
-4. You can see egistered services in Consul UI.
-   Use the POST http://localhost:6002/orders endpoint to create an order, which will internally call the Inventory Service (using consul/sidcar) to check stock levels, e.g.:
-   ```json
-   {
-	"sku": "IP14P",
-	"quantity": 100
-	}
-   ```
+### 1. Requirements
+- .NET 8 SDK
+- Python 3.8+
 
+### 2. Note
+Visual Studio may fail to build the Python project — use Docker Compose instead.
 
-## Conclusion
+### 3. Start services
+```bash
+docker-compose build
+docker-compose up
+```
 
-The architecture supports service discovery, health monitoring, and clear separation of concerns, providing a solid foundation for more complex distributed systems.
+### 4. Access services
+- Consul UI: [http://localhost:8500/ui/dc1/services](http://localhost:8500/ui/dc1/services)
+- Order API: [http://localhost:6002/swagger/index.html](http://localhost:6002/swagger/index.html)
+- Inventory API: [http://localhost:6003/docs#/](http://localhost:6003/docs#/)
+
+### 5. Sample request
+```http
+POST http://localhost:6002/orders
+Content-Type: application/json
+
+{
+  "sku": "IP14P",
+  "quantity": 100
+}
+```
+
+---
+
+## Summary
+
+This POC demonstrates:
+
+- Service discovery via Consul
+- Sidecar pattern for inter-service communication
+- Health monitoring endpoints
