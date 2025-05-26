@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sidecar", "Sidecar\Sidecar.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderServiceApi", "OrderServiceApi\OrderServiceApi.csproj", "{C6F709CD-A2F1-4715-946F-E9B1CE7815BD}"
 EndProject
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "InventoryApi", "InventoryServiceApi\InventoryApi.pyproj", "{EEEF2774-71D3-4C73-B961-55A48EF31425}"
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "InventoryServiceApi", "InventoryServiceApi\InventoryServiceApi.pyproj", "{EEEF2774-71D3-4C73-B961-55A48EF31425}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
